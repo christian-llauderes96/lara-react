@@ -22,6 +22,11 @@ body {
     color: #fff;
 }
 
+.sidebar .nav-item.active {
+    background-color: #0f97c0;
+    color: black;
+}
+
 .sidebar .nav-link:hover {
     background-color: #495057;
 }

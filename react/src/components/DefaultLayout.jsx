@@ -1,21 +1,18 @@
 import React, { useEffect } from "react";
-import { Link, Navigate, Outlet } from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation  } from "react-router-dom";
 import { useStateContext } from "../contexts/ContextsProvider.jsx";
 import axiosClient from "../axios-client";
 
 export default function DefaultLayout() {
-    const { user, token, setUser, setToken } = useStateContext();
+    const { user, token, notification, setUser, setToken } = useStateContext();
+    const location = useLocation();
+
 
     if (!token) {
         return <Navigate to="/login" />;
     }
     const onLogout = (ev)=>{
         ev.preventDefault();
-        // axiosClient.post('/logout', null, {
-        //     headers: {
-        //         Authorization: `Bearer ${token}`,
-        //     }
-        // })
         axiosClient.post("/logout")
         .then(() =>{
             setUser({});
@@ -29,28 +26,6 @@ export default function DefaultLayout() {
             setUser(data);
         })
     },[]);
-
-
-    useEffect(() => {
-        // Load Bootstrap's JavaScript after component mounts
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js";
-        script.async = true;
-        document.body.appendChild(script);
-
-        // Initialize Bootstrap dropdown
-        script.onload = () => {
-            const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
-            dropdownElementList.map(function (dropdownToggleEl) {
-                return new bootstrap.Dropdown(dropdownToggleEl);
-            });
-        };
-
-        // Cleanup function to remove script when component unmounts
-        return () => {
-            document.body.removeChild(script);
-        };
-    }, []);
 
     useEffect(() => {
         // Initialize sidebar toggle functionality
@@ -73,16 +48,13 @@ export default function DefaultLayout() {
     return (
         <div className="d-flex">
             <nav id="sidebar" className="sidebar d-flex flex-column p-3">
-                <h2 className="text-white">Brand Name</h2>
+                <h2 className="text-white">CJBrand</h2>
                 <ul className="nav flex-column">
-                    <li className="nav-item">
+                    <li className={`nav-item ${location.pathname === '/dashboard' ? 'active' : ''}`}>
                         <Link to="/dashboard" className="nav-link">Dashboard</Link>
                     </li>
-                    <li className="nav-item">
+                    <li className={`nav-item ${location.pathname === '/users' ? 'active' : ''}`}>
                         <Link to="/users" className="nav-link">Users</Link>
-                    </li>
-                    <li className="nav-item">
-                        <a className="nav-link" href="#" onClick={onLogout}>Logout</a>
                     </li>
                 </ul>
             </nav>
@@ -100,7 +72,7 @@ export default function DefaultLayout() {
                             <button className="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 { user.name }
                             </button>
-                            <ul className="dropdown-menu " aria-labelledby="userDropdown">
+                            <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><a className="dropdown-item" href="#">Profile</a></li>
                                 <li><a className="dropdown-item" href="#">Settings</a></li>
                                 <li><hr className="dropdown-divider" /></li>
@@ -111,8 +83,10 @@ export default function DefaultLayout() {
                 </nav>
 
                 <div className="container-fluid p-4">
-                    <h1>Main Content</h1>
-                    <p>Your content goes here...</p>
+                    {notification && 
+                    <div className="alert alert-success">
+                        {notification}
+                    </div>}
                     <Outlet /> {/* Render nested routes here */}
                 </div>
             </div>
